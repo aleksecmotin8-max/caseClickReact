@@ -109,3 +109,53 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+.last-drop-overlay{
+  position:fixed;
+  inset: 0;
+  z-index:0 ;
+  background-color: rgb(57, 52, 52, 0.6);
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+.last-drop-card{
+  animation: drop-in 300ms ease-out; 
+  z-index: 10;
+  background-color: #aa3bff;
+  color:black;
+  font-size:20px;
+  font-weight:400;
+
+  width:90vw;
+  height: 60vh;
+  max-width: 420px;
+  max-height: 420px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 30px;
+
+  border-radius: 20px;
+  border: 1px solid #903bff;
+
+
+}
+@media (max-width: 600px){
+  .last-drop-card{
+    width:92vw;
+    height: 70vh;
+  }
+}
+@keyframes drop-in {
+  from {
+       opacity: 0;
+       transform:translateY(100px) scale(0.9) rotateY(-360deg) ;
+       
+  }
+  to{
+       opacity: 1;
+       transform: translateY(0) scale(1) rotateY(0deg);
+  }
+}

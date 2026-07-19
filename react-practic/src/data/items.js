@@ -1,0 +1,58 @@
+export const items = [
+  {
+    id: 1,
+    name: 'P250 | Sand Dune',
+    rarity: 'common',
+    price: 2,
+    weight: 1200,
+  },
+  {
+    id: 2,
+    name: 'MP9 | Goo',
+    rarity: 'common',
+    price: 4,
+    weight: 900,
+  },
+  {
+    id: 3,
+    name: 'USP-S | Cortex',
+    rarity: 'rare',
+    price: 12,
+    weight: 350,
+  },
+  {
+    id: 4,
+    name: 'AK-47 | Redline',
+    rarity: 'rare',
+    price: 28,
+    weight: 180,
+  },
+  {
+    id: 5,
+    name: 'M4A1-S | Player Two',
+    rarity: 'epic',
+    price: 65,
+    weight: 70,
+  },
+  {
+    id: 6,
+    name: 'AWP | Asiimov',
+    rarity: 'epic',
+    price: 110,
+    weight: 35,
+  },
+  {
+    id: 7,
+    name: 'Glock-18 | Fade',
+    rarity: 'legendary',
+    price: 350,
+    weight: 8,
+  },
+  {
+    id: 8,
+    name: 'Karambit | Doppler',
+    rarity: 'legendary',
+    price: 900,
+    weight: 2,
+  },
+];

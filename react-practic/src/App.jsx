@@ -1,85 +1,8 @@
-import './App.css'
-import {useState} from 'react';
-
-const items = [
-  {
-    id: 1,
-    name: 'P250 | Sand Dune',
-    rarity: 'common',
-    price: 2,
-    weight: 1200,
-  },
-  {
-    id: 2,
-    name: 'MP9 | Goo',
-    rarity: 'common',
-    price: 4,
-    weight: 900,
-  },
-  {
-    id: 3,
-    name: 'USP-S | Cortex',
-    rarity: 'rare',
-    price: 12,
-    weight: 350,
-  },
-  {
-    id: 4,
-    name: 'AK-47 | Redline',
-    rarity: 'rare',
-    price: 28,
-    weight: 180,
-  },
-  {
-    id: 5,
-    name: 'M4A1-S | Player Two',
-    rarity: 'epic',
-    price: 65,
-    weight: 70,
-  },
-  {
-    id: 6,
-    name: 'AWP | Asiimov',
-    rarity: 'epic',
-    price: 110,
-    weight: 35,
-  },
-  {
-    id: 7,
-    name: 'Glock-18 | Fade',
-    rarity: 'legendary',
-    price: 350,
-    weight: 8,
-  },
-  {
-    id: 8,
-    name: 'Karambit | Doppler',
-    rarity: 'legendary',
-    price: 900,
-    weight: 2,
-  },
-];
-
-const cases = [
-  {
-    id: 1,
-    name: 'Street Case',
-    price: 5,
-    itemIds: [1, 2, 3, 4],
-  },
-  {
-    id: 2,
-    name: 'Classified Case',
-    price: 25,
-    itemIds: [3, 4, 5, 6],
-  },
-  {
-    id: 3,
-    name: 'High Roller Case',
-    price: 100,
-    itemIds: [4, 5, 6, 7, 8],
-  },
-];
+import './App.css';
+import { useState } from 'react';
+import { items } from './data/items.js';
+import { cases } from './data/cases.js';
+import { rarityLabels } from './data/labels.js';
 
 const delay = ((ms)=>{
   return new Promise((resolve,reject)=>{
@@ -133,15 +56,18 @@ function CaseList({selectCase}){
 </div>
 }
 
+
+
 function CaseOpening({openCase,selectedCase,isOpening}){
 
-  
-
-return <div>{ isOpening ? <p>Loading...</p>
-   : <> <p>{selectedCase.name}</p>
-    <button onClick = {openCase}>open Case</button></>}
+return <div>
+   <p>{selectedCase.name}</p>
+    <button disabled = {isOpening} onClick = {openCase}>
+      {isOpening ? 'Opening...' : 'OPEN'}
+      </button>
 </div>
-}
+};
+
 
 function Message({message}){
 
@@ -151,6 +77,25 @@ function Message({message}){
 
   return <p>{message}</p>
 
+};
+
+function LastDrop({lastDrop,closeLastDrop,sellItem}){
+  const handleContextMenu = ((event)=>{
+     event.preventDefault();
+    closeLastDrop();
+  })
+if(lastDrop === null){
+  return null;
+}else {
+return <div className = 'last-drop-overlay' onContextMenu={handleContextMenu}>
+      <div className='last-drop-card' >
+      <button onClick = {()=>{sellItem(lastDrop.dropId)}}>SELL</button>
+      <p>{rarityLabels[lastDrop.rarity]}</p> 
+      <p>{lastDrop.name}</p>
+      <p>{lastDrop.price}</p>
+    </div>
+</div>
+ }
 }
 
 function Header({title,text}){
@@ -168,14 +113,17 @@ function CoinBalance({coins,handleAddCoin}){
    </div>
 };
 
-const Inventory = ({inventory}) => {
+const Inventory = ({inventory,sellItem}) => {
     return <div>
         {
         inventory.length === 0
          ? <p> Inventory is empty </p>
          :
           inventory.map((item)=>{
-          return <p key={item.dropId}>{item.name}</p>
+          return <div>
+            <p key={item.dropId}>{item.name}</p>
+            <button onClick = {()=>{sellItem(item.dropId)}}>SELL</button>
+            </div>
         })
       }
         
@@ -189,30 +137,51 @@ const Inventory = ({inventory}) => {
 function App() {
 const nameProject = 'Case Opening Simulator';
 
+  const[lastDrop,setLastDrop] = useState(null);
   const[isOpening,setIsOpening] = useState (false);
   const[message,setMessage] = useState('');
   const[coins,setCoins] = useState(1000);
   const[inventory,setInventory] = useState([]);
   const [selectedCaseId,setSelectedCaseId] = useState(null);
+  
+
+
+  const sellItem = (dropId)=>{
+   let currentItem = inventory.find((item)=>{
+    return item.dropId === dropId
+   });
+   if (currentItem === undefined){
+    return;
+   }
+    setInventory(inventory.filter((item)=>{
+       return item.dropId !== currentItem.dropId
+     }));
+
+    setCoins(coinsState => coinsState + currentItem.price);
+
+    setLastDrop(null)
+
+  };
+
+  const closeLastDrop = () => {
+    setLastDrop(null)
+  };
 
   const handleAddCoin = () => {
     setCoins(previousCoins => previousCoins + 1)
-  }
+  };
 
  const selectCase = (caseId)=>{
     setSelectedCaseId(caseId)
-  }
+  };
 
 
 let selectedCase = cases.find((item)=>{
     return item.id === selectedCaseId
-  })
+  });
 
   const openCase = async ()  => {
-
-      
-
-       
+  
     if(coins < selectedCase.price)
       {
 
@@ -224,7 +193,7 @@ let selectedCase = cases.find((item)=>{
      setCoins(previousCoins => previousCoins - selectedCase.price);
 
    try {
-          await delay(2000);
+          await delay(1000);
    let caseItems = items.filter((item)=>{
           return selectedCase.itemIds.includes(item.id)
     })
@@ -235,7 +204,8 @@ let selectedCase = cases.find((item)=>{
         ...randomItem,
         dropId:crypto.randomUUID()
       }
-     
+      
+      setLastDrop(newItem)
       setMessage(stateMessage => stateMessage = '')   
       setInventory((previoiusInventory)=>{
         return [...previoiusInventory,newItem]
@@ -256,13 +226,14 @@ let selectedCase = cases.find((item)=>{
    
     <Header title = {nameProject} text = {'sosi jopu'}/>
      <CoinBalance coins = {coins} handleAddCoin={handleAddCoin} />
+    <LastDrop lastDrop = {lastDrop} closeLastDrop={closeLastDrop} sellItem={sellItem}/>
       <Message  message = {message}/>
      { selectedCaseId === null ?<CaseList selectCase ={selectCase}/>
     :<> <BackCaseList setSelectedCaseId={setSelectedCaseId}/>
        <CaseOpening openCase = {openCase} selectedCase={selectedCase}  isOpening = {isOpening}/>
    </>
      }
-  <Inventory  inventory = {inventory} /> 
+  <Inventory  inventory = {inventory} sellItem={sellItem}/> 
   </div>
 
 };  
