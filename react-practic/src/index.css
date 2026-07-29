@@ -118,6 +118,13 @@ code {
   justify-content: center;
   align-items: center;
 }
+.jopa{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 30px;
+}
 .last-drop-card{
   animation: drop-in 300ms ease-out; 
   z-index: 10;
@@ -156,6 +163,6 @@ code {
   }
   to{
        opacity: 1;
-       transform: translateY(0) scale(1) rotateY(0deg);
+       transform: translateY(0) scale(1) rotateY(0deg) ;
   }
 }
