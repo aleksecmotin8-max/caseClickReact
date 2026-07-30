@@ -7,30 +7,32 @@ import { rarityLabels } from './data/labels.js';
 
 const transitions = {
   mainWindow:{
-     CASE_SELECTED:'selectCaseWindow',
-     OPEN_PROFILE:'profileWindow'
+     CASE_SELECTED: 'selectCaseWindow',
+     OPEN_PROFILE: 'profileWindow'
   },
   selectCaseWindow:{
-     BACK_TO_MAIN:'mainWindow',
-     START_OPENING:'opening'
+     BACK_TO_MAIN: 'mainWindow',
+     START_OPENING: 'opening'
   },
   opening: {
-    OPENING_SUCCEEDED:'result',
-    OPENING_FAILED:'selectCaseWindow'
+    OPENING_SUCCEEDED: 'result',
+    OPENING_FAILED: 'selectCaseWindow'
   },
   profileWindow:{
-   OPEN_INVENTORY:'inventoryWindow',
-   BACK_TO_MAIN:'mainWindow'
+   OPEN_INVENTORY: 'inventoryWindow',
+   BACK_TO_MAIN: 'mainWindow'
   },
   inventoryWindow:{
-   OPEN_PROFILE:'profileWindow'
+   OPEN_PROFILE: 'profileWindow'
   },
   result:{
-   ITEM_SOLD:'selectCaseWindow',
-   ITEM_KEPT:'selectCaseWindow'
+   ITEM_SOLD: 'selectCaseWindow',
+   ITEM_KEPT: 'selectCaseWindow'
   }
 
 }
+
+
 
 const getMedian= ((arr)=>{
   if (arr.length === 0){
@@ -82,37 +84,13 @@ const getRandomItemByWeight = ((items) => {
 });
 
 
-function CaseList({dispatch}){
- return <div>
-      {cases.map((item)=>{
-       return <div key = {item.id} >
-        <p>{item.name}</p>
-        <p>{item.price}</p>
-        <button onClick ={
-          () =>dispatch({
-            type:'CASE_SELECTED',
-            payload:{
-              caseId:item.id
-            }
-          })}>open</button>
+
+function Header({title,text}){
+  return  <div>
+        <h1>{title}</h1>
+        <h2>{text}</h2>
         </div>
-      })}
-</div>
 }
-
-
-function CaseOpening({handleOpenCase,selectedCase,isOpening}){
-
-return <div>
-    {selectedCase === undefined
-    ?<p>case not found</p>
-    :<p>{selectedCase.name}</p>}
-    <button disabled = {isOpening} onClick={handleOpenCase}>
-      { isOpening ? 'Opening...' : 'OPEN'}
-      </button>
-</div>
-};
-
 
 function Message({message}){
 
@@ -124,41 +102,17 @@ function Message({message}){
 
 };
 
-function Header({title,text}){
-  return  <div>
-        <h1>{title}</h1>
-        <h2>{text}</h2>
-        </div>
-}
-
-function CoinBalance({coins,handleAddCoin}){
+function CoinBalance({coins}){
   
    return <div>
     <h2>Coins : {coins}</h2>
-    <button onClick={handleAddCoin}>Add coin</button>
    </div>
 };
 
-const Inventory = ({inventory}) => {
-    return <div>
-        {
-        inventory.length === 0
-         ? <p> Inventory is empty </p>
-         :
-          inventory.map((item)=>{
-          return <div key={item.dropId} >
-            <p>{item.name}</p>
-            <button onClick = {()=>{}}>SELL</button>
-            </div>
-        })
-      }
-        
-     
-    </div>
+function Sell({onSell}){
+  return <button onClick={onSell}>sell</button>
+}
 
-
-    
-  };
 
 function ProfilePath({dispatch}){
 
@@ -173,10 +127,10 @@ function ProfilePath({dispatch}){
   </div>
 };
 
-function MainWindowPath({dispatch}){
+function MainWindowPath({dispatch,isOpening,isResult}){
 
   return <div>
-    <button onClick = {()=>{
+    <button disabled={isOpening||isResult} onClick = {()=>{
       dispatch({
         type:'BACK_TO_MAIN'
       })
@@ -198,48 +152,127 @@ function InventoryPath({dispatch}){
 
 }
 
-function MainWindow ({dispatch,nameProject,coins,handleAddCoin}){
+
+
+function ProfileWindow({dispatch}){
+
+  return <div>
+
+    <InventoryPath dispatch={dispatch}/> 
+    <MainWindowPath dispatch={dispatch}/>
+
+  </div>
+};
+
+function InventoryWindow({inventory,dispatch,sellItemOnInventory}){
+
+  return <div>
+   
+    <ProfilePath dispatch={dispatch}/>
+   <Inventory inventory={inventory} sellItemOnInventory={sellItemOnInventory} />
+
+  </div>
+};
+
+function MainWindow ({dispatch,nameProject,coins}){
 
   return <div>
     
    <Header title = {nameProject} text = {'sosi jopu'}/>
-   <CoinBalance coins = {coins} handleAddCoin={handleAddCoin} />
+   <CoinBalance coins = {coins} />
    <CaseList   dispatch={dispatch}/>
    <ProfilePath dispatch={dispatch} />
 
   </div>
 };
 
-function SelectedCaseWindow({coins,viewType,item,keepItem,isOpening,handleAddCoin,dispatch,handleOpenCase,selectedCase,message}){
+function SelectedCaseWindow({coins,isOpening,isResult,viewType,item,keepItem,sellDroppedItem,dispatch,handleOpenCase,selectedCase,message}){
 
   return <div>
     
     <CoinBalance 
     coins = {coins}
-    handleAddCoin={handleAddCoin}
       />
     <Message 
     message={message}
      />
     <MainWindowPath 
     dispatch={dispatch}
+    isOpening={isOpening}
+    isResult={isResult}
      />
-    {viewType === 'result' && <DropResult item={item} keepItem={keepItem}/>}
+    {viewType === 'result' && 
+    <DropResult 
+     item={item}
+     keepItem={keepItem}
+     sellDroppedItem={sellDroppedItem}
+     />}
     {viewType !=='result' && 
     <CaseOpening 
     isOpening={isOpening}
     handleOpenCase={handleOpenCase} 
     selectedCase={selectedCase}
       />}
+
   </div>
 
 }
 
-function Sell({sellItem}){
-  return <button onClick={sellItem}>sell</button>
-}
 
-function DropResult({item,keepItem}){
+
+function CaseList({dispatch}){
+ return <div>
+      {cases.map((item)=>{
+       return <div key = {item.id} >
+        <p>{item.name}</p>
+        <p>{item.price}</p>
+        <button onClick ={
+          () =>dispatch({
+            type:'CASE_SELECTED',
+            payload:{
+              caseId:item.id,
+              message:''
+            }
+          })}>open</button>
+        </div>
+      })}
+</div>
+};
+
+
+function CaseOpening({handleOpenCase,selectedCase,isOpening}){
+
+return <div>
+    {selectedCase === undefined
+    ?<p>case not found</p>
+    :<p>{selectedCase.name}</p>}
+    <button disabled = {isOpening || selectedCase === undefined} onClick={handleOpenCase}>
+      { isOpening ? 'Opening...' : 'OPEN'}
+      </button>
+</div>
+};
+
+const Inventory = ({inventory,sellItemOnInventory}) => {
+    return <div>
+        {inventory.length === 0
+         ? <p> Inventory is empty </p>
+         : inventory.map((item)=>
+          <div key={item.dropId} >
+            <p>{item.name}</p>
+          <Sell onSell={()=>{sellItemOnInventory(item.dropId)}}/>
+          </div>
+       )
+      }
+        
+     
+    </div>
+
+
+    
+};
+
+
+function DropResult({item,keepItem,sellDroppedItem}){
  
 const handleContextMenu=(event)=>{
   event.preventDefault();
@@ -254,31 +287,13 @@ const handleContextMenu=(event)=>{
       <div className='last-drop-card' >
       <p>{rarityLabels[item.rarity]}</p> 
       <p>{item.name}</p>
-      <Sell/>
+      <Sell onSell={sellDroppedItem}/>
       <p>{item.price}</p>
     </div>
 </div>
-}
+};
 
-function ProfileWindow({dispatch}){
 
-  return <div>
-
-    <InventoryPath dispatch={dispatch}/> 
-    <MainWindowPath dispatch={dispatch}/>
-
-  </div>
-}
-
-function InventoryWindow({inventory,dispatch}){
-
-  return <div>
-   
-    <ProfilePath dispatch={dispatch}/>
-   <Inventory inventory = {inventory} />
-
-  </div>
-}
 
 function App() {
 const nameProject = 'Case Opening Simulator';
@@ -295,11 +310,14 @@ const nameProject = 'Case Opening Simulator';
     }
   });
 
+const selectedCase = cases.find(
+  (item)=> item.id === view.payload.caseId
+)
 
   const dispatch = ((action)=>{
 
    setView((prevView)=>{
-    const nextView = transitionsExstractor(
+    const nextView = transitionsExtractor(
       prevView.type,
       action.type
     )
@@ -315,22 +333,10 @@ const nameProject = 'Case Opening Simulator';
       }
     }
    })
-  
-
   })
 
-const caseHandler = (itemId)=>{
-  dispatch({
-    type:'CASE_SELECTED',
-    payload:{
-      caseId:itemId
-    }
-  })
-}
-
-
   
-const transitionsExstractor  = ((currentState,event)=>{
+const transitionsExtractor  = ((currentState,event)=>{
     const possibleStates = transitions[currentState]
 
     if (possibleStates === undefined){
@@ -346,39 +352,45 @@ const transitionsExstractor  = ((currentState,event)=>{
     return nextState
 
 });
+
+const sellDroppedItem = () =>{
+  const item = view.payload.item;
   
-
-  const sellItem = (dropId)=>{
-   let currentItem = inventory.find((item)=>{
-    return item.dropId === dropId
-   });
-   if (currentItem === undefined){
+  if (item == null){
     return;
-   }
-    setInventory(inventory.filter((item)=>{
-       return item.dropId !== currentItem.dropId
-     }));
+  }
 
-    setCoins(coinsState => coinsState + currentItem.price);
+  setCoins(coins => coins + item.price)
 
-  };
+   dispatch({
+    type:'ITEM_SOLD',
+    payload:{
+      item:null
+    }
+   })
+};
 
+const sellItemOnInventory = ((dropId) => {
 
-  const handleAddCoin = () => {
-    setCoins(previousCoins => previousCoins + 1)
-  };
+ if (dropId == null){
+    return;
+   };
 
+   const findedItem = inventory.find((item)=>item.dropId === dropId);
+   
+  if(findedItem == null){
+      return;
+    };
 
+  setCoins((coins)=>{return coins+findedItem.price})
+  setInventory((prev)=>prev.filter((item)=>item.dropId !== dropId))
 
-
-const selectedCase = cases.find((item)=>{
-    return item.id === view.payload.caseId
-   });
+})
 
 const keepItem = () => {
   const item = view.payload.item;
 
-  if (item === null){
+  if (item == null){
     return;
   }
 
@@ -395,9 +407,12 @@ const keepItem = () => {
 
 }
 
-
 const  handleOpenCase = async ()  => {
   
+   if(selectedCase === undefined){
+   return;
+   }
+
     if(coins < selectedCase.price)
 
       {
@@ -419,22 +434,23 @@ const  handleOpenCase = async ()  => {
    })
     
 
-   try {
+   try{
           await delay(1000);
 
    let caseItems = items.filter((item)=>{
-
           return selectedCase.itemIds.includes(item.id);
     });
 
-    let randomItem = getRandomItemByWeight(caseItems)
-       if(randomItem !== undefined){
+   let randomItem = getRandomItemByWeight(caseItems)
+       if(randomItem === undefined){
+         throw new Error('No item found on case')
+      }
       const newItem = {
         ...randomItem,
         dropId:crypto.randomUUID()
       }
 
-      setCoins((previousCoins )=> {
+   setCoins((previousCoins )=> {
         if (selectedCase.price === undefined){
           return previousCoins;
         }else
@@ -443,19 +459,18 @@ const  handleOpenCase = async ()  => {
           }}
         );
   
-      dispatch({
+   dispatch({
         type:'OPENING_SUCCEEDED',
         payload:{
           item:newItem,
           message:''
         }
       })
-    
-   }
-  }catch(error){
+   
+  } catch(error){
          dispatch({
-        type:'OPENING_FAILED',
-        payload:{
+          type:'OPENING_FAILED',
+          payload:{
           item:null,
           message:error.message
         }
@@ -467,21 +482,21 @@ const  handleOpenCase = async ()  => {
  {['selectCaseWindow','opening','result'].includes(view.type) && (
   <SelectedCaseWindow
     coins = {coins}
-    handleAddCoin={handleAddCoin}
-    selectedCase={selectedCase}
     dispatch={dispatch} 
     handleOpenCase={handleOpenCase}
     isOpening={view.type === 'opening'}
+    isResult={view.type === 'result'}
     message={view.payload.message}
     viewType={view.type}
     item={view.payload.item}
     keepItem={keepItem}
+    selectedCase={selectedCase}
+    sellDroppedItem={sellDroppedItem}
      />)} 
  {view.type === 'mainWindow' && 
     <MainWindow 
     nameProject = {nameProject} 
     coins = {coins}
-    handleAddCoin={handleAddCoin}
     dispatch={dispatch}
      />}   
  {view.type ==='profileWindow'
@@ -490,9 +505,10 @@ const  handleOpenCase = async ()  => {
   {view.type === 'inventoryWindow' && 
     <InventoryWindow 
     inventory = {inventory} 
-    dispatch={dispatch}/>}
+    dispatch={dispatch}
+    sellItemOnInventory={sellItemOnInventory}
+    />}
    </div>
 };  
 
-  
  export default App
