@@ -182,3 +182,72 @@
     border-right-color: var(--border);
   }
 }
+
+/* --- New game theme styles --- */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 28px 20px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  border-bottom: 1px solid var(--border);
+}
+.site-header h1 { margin: 0; font-size: 28px; color: var(--text-h); }
+.site-header h2 { margin: 0; font-size: 14px; color: var(--muted); }
+
+.main-window { padding: 24px; display:flex; flex-direction:column; gap:20px; }
+.main-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+
+.nav-actions { display:flex; gap:8px; align-items:center; }
+
+/* Buttons */
+.btn { font-weight:600; padding:10px 14px; border-radius:10px; border:1px solid transparent; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; }
+.btn:active{ transform: translateY(1px); }
+.btn:disabled{ opacity:0.6; cursor:not-allowed; }
+.btn-primary { background: linear-gradient(90deg,var(--accent-600),var(--accent)); color:white; box-shadow: 0 6px 20px rgba(143,69,255,0.14); border:1px solid rgba(255,255,255,0.04); }
+.btn-ghost { background: transparent; color:var(--text); border:1px solid transparent; }
+
+.case-list { display:grid; grid-template-columns: repeat(4, 1fr); gap:18px; padding: 10px 0; }
+.case-card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02)); border:1px solid var(--border); padding:14px; border-radius:12px; display:flex; flex-direction:column; gap:10px; align-items:flex-start; box-shadow: var(--shadow); }
+.case-image { width:100%; height:110px; border-radius:8px; background: linear-gradient(135deg, rgba(151,73,255,0.14), rgba(0,0,0,0.12)); box-shadow: inset 0 -20px 40px rgba(0,0,0,0.4); }
+.case-meta { display:flex; width:100%; justify-content:space-between; align-items:center; }
+.case-name { color:var(--text-h); font-weight:600; }
+.case-price { color:var(--accent); font-weight:700; }
+
+.case-opening { display:flex; flex-direction:column; gap:12px; align-items:center; }
+.opening-title { font-size:20px; color:var(--text-h); }
+
+.inventory-grid{ display:grid; grid-template-columns: repeat(4,1fr); gap:14px; padding: 10px 0; }
+.inventory-card{ background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.04)); border:1px solid var(--border); padding:12px; border-radius:12px; display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
+.inventory-thumb{ width:100%; height:90px; border-radius:8px; background: linear-gradient(90deg, rgba(143,69,255,0.14), rgba(0,0,0,0.12)); }
+.inventory-name{ color:var(--text-h); font-weight:600; }
+.inventory-price{ color:var(--accent); font-weight:700; }
+.empty{ color:var(--muted); padding:20px; }
+
+.case-panel{ padding:20px; display:flex; flex-direction:column; gap:12px; }
+.panel-top{ display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.panel-body{ display:flex; justify-content:center; align-items:center; padding:18px; }
+
+.last-drop-overlay{ background-color: rgba(4,4,6,0.6); z-index:40; }
+.last-drop-card.drop-modal{ background: linear-gradient(180deg,#0f0f12,#141416); border:1px solid var(--accent-border); padding:18px; max-width:560px; width:90%; display:flex; gap:18px; align-items:center; border-radius:16px; box-shadow: 0 30px 80px rgba(0,0,0,0.8); }
+.drop-media{ width:44%; height:220px; border-radius:12px; background: linear-gradient(90deg, rgba(151,73,255,0.2), rgba(0,0,0,0.25)); }
+.drop-info{ width:56%; text-align:left; color:var(--text); }
+.drop-rarity{ color:var(--muted); font-size:13px; }
+.drop-name{ color:var(--text-h); font-size:20px; font-weight:700; margin:6px 0; }
+.drop-price{ color:var(--accent); font-weight:800; font-size:18px; margin-bottom:12px; }
+.drop-actions{ display:flex; gap:10px; }
+
+/* Responsive */
+@media (max-width: 980px){
+  .case-list{ grid-template-columns: repeat(2,1fr); }
+  .inventory-grid{ grid-template-columns: repeat(2,1fr); }
+  .last-drop-card.drop-modal{ flex-direction:column; align-items:center; }
+  .drop-media{ width:80%; height:180px; }
+  .drop-info{ width:100%; }
+}
+@media (max-width: 520px){
+  .case-list{ grid-template-columns: 1fr; }
+  .inventory-grid{ grid-template-columns: 1fr; }
+  .site-header{ padding:14px; }
+}
