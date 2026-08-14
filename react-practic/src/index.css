@@ -3,13 +3,14 @@
   --text-h: #ffffff;
   --bg: #0b0c10;
   --surface: #0f1114;
-  --muted: #8b8fa0;
+  --muted: #a98f8f;
   --border: rgba(255,255,255,0.04);
   --code-bg: #0d0e12;
-  --accent: #b76cff;
-  --accent-600: #8f45ff;
-  --accent-bg: rgba(151, 73, 255, 0.08);
-  --accent-border: rgba(151, 73, 255, 0.35);
+  --accent: #bf4040;
+  --accent-600: #8f2d2d;
+  --accent-bg: rgba(191,64,64,0.08);
+  --accent-border: rgba(191,64,64,0.28);
+  --accent-rgb: 191,64,64;
   --shadow: 0 10px 30px rgba(3,3,8,0.6), 0 2px 6px rgba(0,0,0,0.6);
 
   --sans: Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -108,8 +109,8 @@ code {
 .last-drop-card{
   animation: drop-in 300ms ease-out; 
   z-index: 10;
-  background-color: #aa3bff;
-  color:black;
+  background-color: rgba(var(--accent-rgb),0.18);
+  color: #fff;
   font-size:20px;
   font-weight:400;
 
@@ -125,7 +126,7 @@ code {
   padding-bottom: 30px;
 
   border-radius: 20px;
-  border: 1px solid #903bff;
+  border: 1px solid var(--accent-border);
 
 
 }

@@ -34,6 +34,7 @@ const transitions = {
 
 
 
+/* eslint-disable-next-line no-unused-vars */
 const getMedian= ((arr)=>{
   if (arr.length === 0){
     return null;
@@ -54,7 +55,7 @@ const delay = ((ms)=>{
   return new Promise((resolve,reject)=>{
     setTimeout (()=>{
       const randomNumber = Math.random()
-      if (randomNumber<0.1){
+      if (randomNumber<0.0001){
         reject(new Error('Server blocked'))
       } else {
         resolve()}
@@ -104,33 +105,79 @@ function Message({message}){
 
 function CoinBalance({coins}){
   return <div className="coin-balance">
-   <h2>Coins : {coins}</h2>
+    <h2>Монеты: {coins}</h2>
   </div>
 };
 
+function RarityToggle({inventoryControls,setInventoryControls}){
+  return (
+    <select className="control-select" value={inventoryControls.rarity} onChange={(e)=>{
+      setInventoryControls((prev) => ({
+        ...prev,
+        rarity: e.target.value
+      }))
+    }}>
+      <option value="all">Все</option>
+      <option value="common">Обычные</option>
+      <option value="rare">Редкие</option>
+      <option value="epic">Эпические</option>
+      <option value="legendary">Легендарные</option>
+    </select>
+  )
+}
+
+function SortBySelect({inventoryControls,setInventoryControls}){
+  return (
+    <select className="control-select" value={inventoryControls.sortBy} onChange={(e)=>{
+      setInventoryControls((prev)=>({
+        ...prev,
+        sortBy: e.target.value
+      }))
+    }}>
+      <option value="date">По дате</option>
+      <option value="price">По цене</option>
+      <option value="rarity">По редкости</option>
+    </select>
+  )
+}
+
+function ButtonDirection({inventoryControls,setInventoryControls}){
+  return (
+    <button className="btn btn-ghost sort-direction" onClick={()=>{
+      setInventoryControls((prev)=>(({
+        ...prev,
+        sortDirection: prev.sortDirection === 'asc' ? 'desc' : 'asc'
+      })))
+    }}>
+      {inventoryControls.sortDirection === 'asc' ? 'По возрастанию' : 'По убыванию'}
+    </button>
+  )
+}
+
+
 function Sell({onSell}){
-  return <button onClick={onSell}>sell</button>
+  return <button className="btn btn-ghost" onClick={onSell}>Продать</button>
 }
 
 
 function ProfilePath({dispatch}){
 
   return <div className="nav-actions">
-    <button className="btn btn-ghost" onClick = {()=>{dispatch({type:'OPEN_PROFILE'})}}>PROFILE</button>
+    <button className="btn btn-ghost" onClick = {()=>{dispatch({type:'OPEN_PROFILE'})}}>Профиль</button>
   </div>
 };
 
 function MainWindowPath({dispatch,isOpening,isResult}){
 
   return <div className="nav-actions">
-    <button className="btn btn-ghost" disabled={isOpening||isResult} onClick = {()=>{dispatch({type:'BACK_TO_MAIN'})}}>BACK</button>
+    <button className="btn btn-ghost" disabled={isOpening||isResult} onClick = {()=>{dispatch({type:'BACK_TO_MAIN'})}}>Назад</button>
   </div>
 };
 
 function InventoryPath({dispatch}){
 
   return <div className="nav-actions">
-    <button className="btn btn-ghost" onClick = {()=>{dispatch({type:'OPEN_INVENTORY'})}}>INVENTORY</button>
+    <button className="btn btn-ghost" onClick = {()=>{dispatch({type:'OPEN_INVENTORY'})}}>Инвентарь</button>
   </div>
 
 }
@@ -145,11 +192,16 @@ function ProfileWindow({dispatch}){
   </div>
 };
 
-function InventoryWindow({inventory,dispatch,sellItemOnInventory}){
+function InventoryWindow({visibleInventory,dispatch,sellItemOnInventory,inventoryControls,setInventoryControls}){
 
   return <div className="inventory-window layout">
     <ProfilePath dispatch={dispatch}/> 
-   <Inventory inventory={inventory} sellItemOnInventory={sellItemOnInventory} />
+    <div className="inventory-controls">
+      <SortBySelect inventoryControls={inventoryControls} setInventoryControls={setInventoryControls} />
+      <RarityToggle inventoryControls={inventoryControls} setInventoryControls={setInventoryControls} />
+      <ButtonDirection inventoryControls={inventoryControls} setInventoryControls={setInventoryControls} />
+    </div>
+   <Inventory inventory={visibleInventory} sellItemOnInventory={sellItemOnInventory} />
   </div>
 };
 
@@ -194,7 +246,7 @@ function CaseList({dispatch}){
           <p className="case-name">{item.name}</p>
           <p className="case-price">${item.price}</p>
         </div>
-        <button className="btn btn-primary" onClick ={() =>dispatch({type:'CASE_SELECTED',payload:{caseId:item.id,message:''}})}>OPEN</button>
+        <button className="btn btn-primary" onClick ={() =>dispatch({type:'CASE_SELECTED',payload:{caseId:item.id,message:''}})}>Открыть</button>
         </div>
       })}
 </div>
@@ -204,31 +256,30 @@ function CaseList({dispatch}){
 function CaseOpening({handleOpenCase,selectedCase,isOpening}){
 return <div className="case-opening">
     {selectedCase === undefined
-    ?<p>case not found</p>
+    ?<p>Кейс не найден</p>
     :<p className="opening-title">{selectedCase.name}</p>}
     <button className="btn btn-primary" disabled = {isOpening || selectedCase === undefined} onClick={handleOpenCase}>
-      { isOpening ? 'Opening...' : 'OPEN'}
+      { isOpening ? 'Открытие...' : 'Открыть'}
       </button>
 </div>
 };
 
 const Inventory = ({inventory,sellItemOnInventory}) => {
-    return <div className="inventory-grid">
-        {inventory.length === 0
-         ? <p className="empty">Inventory is empty</p>
-         : inventory.map((item)=>(
+    if (!inventory || inventory.length === 0) {
+      return null;
+    }
+    return (
+      <div className="inventory-grid">
+        {inventory.map((item)=>(
           <div className="inventory-card" key={item.dropId} >
             <div className="inventory-thumb" aria-hidden="true" />
             <p className="inventory-name">{item.name}</p>
             <p className="inventory-price">${item.price}</p>
             <Sell onSell={()=>{sellItemOnInventory(item.dropId)}}/>
           </div>
-         ))
-      }
-    </div>
-
-
-    
+         ))}
+      </div>
+    )
 };
 
 
@@ -246,13 +297,13 @@ const handleContextMenu=(event)=>{
   return <div className = 'last-drop-overlay' onContextMenu={handleContextMenu} >
       <div className='last-drop-card drop-modal' >
         <div className="drop-media" />
-        <div className="drop-info">
+          <div className="drop-info">
           <p className="drop-rarity">{rarityLabels[item.rarity]}</p>
           <p className="drop-name">{item.name}</p>
           <p className="drop-price">${item.price}</p>
           <div className="drop-actions">
-            <button className="btn btn-primary" onClick={sellDroppedItem}>SELL FOR ${item.price}</button>
-            <button className="btn btn-ghost" onClick={keepItem}>ADD INVENTORY</button>
+            <button className="btn btn-primary" onClick={sellDroppedItem}>Продать за ${item.price}</button>
+            <button className="btn btn-ghost" onClick={keepItem}>В инвентарь</button>
           </div>
         </div>
       </div>
@@ -262,7 +313,7 @@ const handleContextMenu=(event)=>{
 
 
 function App() {
-const nameProject = 'Case Opening Simulator';
+const nameProject = 'Симулятор открытия кейсов';
 
 
   const[coins,setCoins] = useState(1000);
@@ -275,6 +326,51 @@ const nameProject = 'Case Opening Simulator';
       item:null
     }
   });
+  const[inventoryControls,setInventoryControls] = useState({
+    sortBy:'date',
+    sortDirection:'desc',
+    rarity:'all'
+  });
+  const[showSettings,setShowSettings] = useState(false);
+  const toggleSettings = () => setShowSettings((prev)=>!prev);
+
+const rarityOrder = {
+  common:1,
+  rare:2,
+  epic:3,
+  legendary:4
+}
+
+const compareItems = (a, b) => {
+  let comparison = 0
+
+  if (inventoryControls.sortBy === 'price') {
+    comparison = a.price - b.price
+  }
+
+  if (inventoryControls.sortBy === 'date') {
+    comparison = a.droppedAt - b.droppedAt
+  }
+
+  if (inventoryControls.sortBy === 'rarity') {
+    comparison =
+      rarityOrder[a.rarity] - rarityOrder[b.rarity]
+  }
+
+  const direction =
+    inventoryControls.sortDirection === 'asc' ? 1 : -1
+
+  return comparison * direction
+}
+
+
+const visibleInventory = inventory.filter((item) => {
+  if (inventoryControls.rarity === 'all') {
+    return true;
+  }
+  return item.rarity === inventoryControls.rarity;
+}).sort(compareItems);
+
 
 const selectedCase = cases.find(
   (item)=> item.id === view.payload.caseId
@@ -301,7 +397,7 @@ const selectedCase = cases.find(
    })
   })
 
-  
+
 const transitionsExtractor  = ((currentState,event)=>{
     const possibleStates = transitions[currentState]
 
@@ -413,7 +509,8 @@ const  handleOpenCase = async ()  => {
       }
       const newItem = {
         ...randomItem,
-        dropId:crypto.randomUUID()
+        dropId:crypto.randomUUID(),
+        droppedAt:Date.now()
       }
 
    setCoins((previousCoins )=> {
@@ -444,8 +541,14 @@ const  handleOpenCase = async ()  => {
     
   }
 }
-  return <div>
- {['selectCaseWindow','opening','result'].includes(view.type) && (
+  return <div className="app-shell">
+    <button className="btn btn-ghost settings-trigger" onClick={toggleSettings}>Настройки</button>
+    {showSettings && (
+      <div className="settings-panel">
+        <div className="settings-panel__header">Настройки</div>
+      </div>
+    )}
+    {['selectCaseWindow','opening','result'].includes(view.type) && (
   <SelectedCaseWindow
     coins = {coins}
     dispatch={dispatch} 
@@ -470,9 +573,11 @@ const  handleOpenCase = async ()  => {
      dispatch={dispatch}/>}
   {view.type === 'inventoryWindow' && 
     <InventoryWindow 
-    inventory = {inventory} 
+    visibleInventory={visibleInventory}
     dispatch={dispatch}
     sellItemOnInventory={sellItemOnInventory}
+    inventoryControls={inventoryControls}
+    setInventoryControls={setInventoryControls}
     />}
    </div>
 };  
