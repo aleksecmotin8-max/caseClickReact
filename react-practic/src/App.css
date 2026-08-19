@@ -207,7 +207,7 @@
 .nav-actions { display:flex; gap:8px; align-items:center; }
 
 /* Buttons */
-.btn { font-weight:600; padding:10px 14px; border-radius:10px; border:1px solid transparent; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; }
+.btn { font-weight:600; padding:10px 14px; border-radius:10px; border:1px solid transparent; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; text-decoration: none;}
 .btn:active{ transform: translateY(1px); }
 .btn:disabled{ opacity:0.6; cursor:not-allowed; }
 .btn-primary { background: linear-gradient(90deg,var(--accent-600),var(--accent)); color:white; box-shadow: 0 6px 20px rgba(143,69,255,0.14); border:1px solid rgba(255,255,255,0.04); }
