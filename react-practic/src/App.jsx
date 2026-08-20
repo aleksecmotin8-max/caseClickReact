@@ -1,26 +1,15 @@
 import './App.css';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { items } from './data/items.js';
 import { cases } from './data/cases.js';
 import { rarityLabels } from './data/labels.js';
 import { Routes, Route, Link, useParams } from 'react-router';
+import { useAuth } from './hooks/useAuth.js';
+import { supabase } from './lib/supabase.js';
+import { AuthForm } from './components/AuthForm.jsx';
+import { AuthModal } from './components/AuthModal.jsx';
 
-/* eslint-disable-next-line no-unused-vars */
-const getMedian= ((arr)=>{
-  if (arr.length === 0){
-    return null;
-  };
 
-  const sortArr = [...arr].sort((a,b)=>a-b);
-  const midArr = Math.floor(sortArr.length/2);
-
-  if(sortArr.length % 2 === 0){
-    return (sortArr[midArr-1] + sortArr[midArr])/2;
-    };
-
-return sortArr[midArr];
-
-})
 
 const delay = ((ms)=>{
   return new Promise((resolve,reject)=>{
@@ -340,6 +329,7 @@ const handleContextMenu=(event)=>{
 function App() {
 const nameProject = 'Симулятор открытия кейсов';
 
+  const { user, loading: authLoading } = useAuth();
 
   const[coins,setCoins] = useState(1000);
   const[inventory,setInventory] = useState([]);
@@ -348,27 +338,8 @@ const nameProject = 'Симулятор открытия кейсов';
     sortDirection:'desc',
     rarity:'all'
   });
-  const[showSettings,setShowSettings] = useState(false);
-  const toggleSettings = () => setShowSettings((prev)=>!prev);
-  const settingsRef = useRef(null);
-
-  useEffect(() => {
-    console.log('SETUP', showSettings)
-    if (!showSettings) {
-      return;
-    }
-
-    const handleClickOutside = (event) => {
-      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
-        setShowSettings(false);
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return (() => {document.removeEventListener('click', handleClickOutside);
-      console.log('CLEAN')
-    })
-  }, [showSettings]);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const isAuthModalOpen = showAuthModal && !user;
 
 const rarityOrder = {
   common:1,
@@ -443,17 +414,29 @@ const keepItem = (item) => {
 });
 }
 
+  if (authLoading) {
+    return <div className="auth-window layout"><p className="message">Загрузка...</p></div>;
+  }
+
   return (
 
     <div className="app-shell">
-      <div className="settings" ref={settingsRef}>
-        <button className="btn btn-ghost settings-trigger" onClick={toggleSettings}>Настройки</button>
-        {showSettings && (
-          <div className="settings-panel">
-            <div className="settings-panel__header">Настройки</div>
+      <div className="header-bar">
+        {user ? (
+          <div className="user-chip">
+            <span className="user-chip__email">{user.email}</span>
+            <button className="btn btn-ghost" onClick={() => supabase.auth.signOut()}>Выйти</button>
           </div>
+        ) : (
+          <button className="btn btn-primary auth-trigger" onClick={() => setShowAuthModal(true)}>Войти</button>
         )}
       </div>
+
+      {isAuthModalOpen && (
+        <AuthModal onClose={() => setShowAuthModal(false)}>
+          <AuthForm />
+        </AuthModal>
+      )}
 
       <Routes>
         <Route path="/" element={
