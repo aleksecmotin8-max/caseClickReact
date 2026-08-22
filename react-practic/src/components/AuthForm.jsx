@@ -6,6 +6,7 @@ export function AuthForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const isSignIn = mode === 'signIn';
@@ -23,13 +24,20 @@ export function AuthForm() {
 
     setLoading(true);
     setError('');
+    setMessage('');
 
     const { error: authError } = isSignIn
       ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password });
+      : await supabase.auth.signUp({
+  email,
+  password,
+  options: { emailRedirectTo: window.location.origin }
+})
 
     if (authError) {
       setError(authError.message);
+    }else if (!isSignIn) {
+  setMessage('Проверьте почту — там ссылка для подтверждения.');
     }
 
     setLoading(false);
@@ -66,6 +74,7 @@ export function AuthForm() {
         </label>
 
         {error && <p className="message auth-error">{error}</p>}
+        {message && <p className="message auth-success">{message}</p>}
 
         <button className="btn btn-primary auth-submit" type="submit" disabled={loading}>
           {loading ? 'Подождите...' : isSignIn ? 'Войти' : 'Зарегистрироваться'}
