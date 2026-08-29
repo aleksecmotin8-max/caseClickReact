@@ -1,15 +1,11 @@
 import './App.css';
-import { useState } from 'react';
-import { items } from './data/items.js';
-import { cases } from './data/cases.js';
-import { rarityLabels } from './data/labels.js';
+import { useState,useEffect } from 'react';
 import { Routes, Route, Link, useParams } from 'react-router';
 import { useAuth } from './hooks/useAuth.js';
+import { useCases } from './hooks/useCases.js';
 import { supabase } from './lib/supabase.js';
 import { AuthForm } from './components/AuthForm.jsx';
 import { AuthModal } from './components/AuthModal.jsx';
-
-
 
 const delay = ((ms)=>{
   return new Promise((resolve,reject)=>{
@@ -157,7 +153,7 @@ function InventoryWindow({visibleInventory,sellItemOnInventory,inventoryControls
   </div>
 };
 
-function MainWindow ({nameProject,coins}){
+function MainWindow ({nameProject,coins,cases,casesLoading,casesError}){
 
   return <main className="main-window">
    <div className="main-top">
@@ -165,12 +161,12 @@ function MainWindow ({nameProject,coins}){
    <CoinBalance coins = {coins} />
    <ProfilePath />
    </div>
-   <CaseList className="cases" />
+   <CaseList cases={cases} casesLoading={casesLoading} casesError={casesError} />
   </main>
 };
 
 
-function SelectedCaseWindow({ coins, setCoins, keepItem, sellDroppedItem }) {
+function SelectedCaseWindow({ coins, setCoins, keepItem, sellDroppedItem, cases, casesLoading }) {
   const { caseId } = useParams();
   const selectedCase = cases.find((item) => item.id === Number(caseId));
 
@@ -194,8 +190,7 @@ function SelectedCaseWindow({ coins, setCoins, keepItem, sellDroppedItem }) {
     try {
       await delay(1000);
 
-      const caseItems = items.filter((item) => selectedCase.itemIds.includes(item.id));
-      const randomItem = getRandomItemByWeight(caseItems);
+      const randomItem = getRandomItemByWeight(selectedCase.items);
       if (randomItem === undefined) {
         throw new Error('No item found on case');
       }
@@ -242,6 +237,7 @@ function SelectedCaseWindow({ coins, setCoins, keepItem, sellDroppedItem }) {
             isOpening={status === 'opening'}
             handleOpenCase={handleOpenCase}
             selectedCase={selectedCase}
+            casesLoading={casesLoading}
           />
         )}
       </div>
@@ -251,7 +247,15 @@ function SelectedCaseWindow({ coins, setCoins, keepItem, sellDroppedItem }) {
 
 
 
-function CaseList(){
+function CaseList({cases,casesLoading,casesError}){
+ if (casesLoading){
+   return <p className="message">Загрузка...</p>
+ }
+
+ if (casesError){
+   return <p className="message">Не удалось загрузить кейсы: {casesError}</p>
+ }
+
  return <div className="case-list">
       {cases.map((item)=>{
        return <div className="case-card" key = {item.id} >
@@ -267,12 +271,14 @@ function CaseList(){
 };
 
 
-function CaseOpening({handleOpenCase,selectedCase,isOpening}){
+function CaseOpening({handleOpenCase,selectedCase,isOpening,casesLoading}){
 return <div className="case-opening">
-    {selectedCase === undefined
+    {casesLoading
+    ?<p>Загрузка...</p>
+    :selectedCase === undefined
     ?<p>Кейс не найден</p>
     :<p className="opening-title">{selectedCase.name}</p>}
-    <button className="btn btn-primary" disabled = {isOpening || selectedCase === undefined} onClick={handleOpenCase}>
+    <button className="btn btn-primary" disabled = {isOpening || casesLoading || selectedCase === undefined} onClick={handleOpenCase}>
       { isOpening ? 'Открытие...' : 'Открыть'}
       </button>
 </div>
@@ -312,7 +318,7 @@ const handleContextMenu=(event)=>{
       <div className='last-drop-card drop-modal' >
         <div className="drop-media" />
           <div className="drop-info">
-          <p className="drop-rarity">{rarityLabels[item.rarity]}</p>
+          <p className="drop-rarity">{item.rarity}</p>
           <p className="drop-name">{item.name}</p>
           <p className="drop-price">${item.price}</p>
           <div className="drop-actions">
@@ -329,7 +335,10 @@ const handleContextMenu=(event)=>{
 function App() {
 const nameProject = 'Симулятор открытия кейсов';
 
+
+
   const { user, loading: authLoading } = useAuth();
+  const { cases: caseCatalog, loading: casesLoading, error: casesError } = useCases();
 
   const[coins,setCoins] = useState(1000);
   const[inventory,setInventory] = useState([]);
@@ -340,6 +349,7 @@ const nameProject = 'Симулятор открытия кейсов';
   });
   const [showAuthModal, setShowAuthModal] = useState(false);
   const isAuthModalOpen = showAuthModal && !user;
+
 
 const rarityOrder = {
   common:1,
@@ -440,7 +450,7 @@ const keepItem = (item) => {
 
       <Routes>
         <Route path="/" element={
-          <MainWindow nameProject={nameProject} coins={coins} />
+          <MainWindow nameProject={nameProject} coins={coins} cases={caseCatalog} casesLoading={casesLoading} casesError={casesError} />
         } />
 
         <Route path="/case/:caseId" element={
@@ -449,6 +459,8 @@ const keepItem = (item) => {
             setCoins={setCoins}
             keepItem={keepItem}
             sellDroppedItem={sellDroppedItem}
+            cases={caseCatalog}
+            casesLoading={casesLoading}
           />
         } />
 

@@ -14,6 +14,7 @@ export function AuthForm() {
   const toggleMode = () => {
     setMode((prev) => (prev === 'signIn' ? 'signUp' : 'signIn'));
     setError('');
+    setMessage('');
   };
 
   const handleSubmit = async (event) => {
@@ -56,6 +57,7 @@ export function AuthForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
+            disabled={loading}
             required
           />
         </label>
@@ -69,6 +71,7 @@ export function AuthForm() {
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={isSignIn ? 'current-password' : 'new-password'}
             minLength={8}
+            disabled={loading}
             required
           />
         </label>

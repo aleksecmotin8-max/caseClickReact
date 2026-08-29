@@ -28,8 +28,11 @@ dist-ssr
 !.env.example
 
 
-.claude/
 .cursor/
 .mcp.json
 *.pem
 *.key
+
+
+.claude/settings.local.json
+CLAUDE.local.md
