@@ -259,7 +259,7 @@
 .auth-input{ background: rgba(255,255,255,0.03); color:var(--text); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 14px; font-size:15px; transition: border-color .16s, box-shadow .16s; }
 .auth-input:focus{ outline:none; border-color: rgba(var(--accent-rgb),0.6); box-shadow: 0 0 0 2px rgba(var(--accent-rgb),0.12); }
 .auth-error{ margin:0; color:var(--accent); font-size:13px; }
-.auth-success{ margin:0; color:#4ade80; font-size:13px; }
+.auth-success{ margin:0; color:var(--success); font-size:13px; }
 .auth-submit{ width:100%; }
 .auth-switch{ width:100%; font-size:13px; }
 

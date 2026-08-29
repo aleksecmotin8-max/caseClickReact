@@ -11,6 +11,7 @@
   --accent-bg: rgba(191,64,64,0.08);
   --accent-border: rgba(191,64,64,0.28);
   --accent-rgb: 191,64,64;
+  --success: #4ade80;
   --shadow: 0 10px 30px rgba(3,3,8,0.6), 0 2px 6px rgba(0,0,0,0.6);
 
   --sans: Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
